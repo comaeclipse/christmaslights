@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>PensacolaLights - Christmas Light Display Map & Guide | Pensacola, FL</title>
+    <meta name="title" content="PensacolaLights - Christmas Light Display Map & Guide | Pensacola, FL">
+    <meta name="description" content="Discover the best Christmas light displays in Pensacola, Florida. Interactive map with locations, schedules, FM radio stations, reviews, and directions to holiday light shows near you.">
+    <meta name="keywords" content="Pensacola Christmas lights, holiday light displays, Christmas decorations Pensacola FL, light show map, Christmas light tour, Pensacola holiday events, Florida Christmas lights">
+    <meta name="author" content="PensacolaLights">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pensacolalights.app/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pensacolalights.app/">
+    <meta property="og:title" content="PensacolaLights - Christmas Light Display Map & Guide">
+    <meta property="og:description" content="Discover the best Christmas light displays in Pensacola, Florida. Interactive map with locations, schedules, and reviews.">
+    <meta property="og:image" content="https://pensacolalights.app/og-image.png">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="PensacolaLights">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://pensacolalights.app/">
+    <meta name="twitter:title" content="PensacolaLights - Christmas Light Display Map & Guide">
+    <meta name="twitter:description" content="Discover the best Christmas light displays in Pensacola, Florida. Interactive map with locations, schedules, and reviews.">
+    <meta name="twitter:image" content="https://pensacolalights.app/og-image.png">
+    
+    <!-- Theme and Favicon -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎄</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎄</text></svg>">
+    
+    <!-- Additional SEO -->
+    <meta name="geo.region" content="US-FL">
+    <meta name="geo.placename" content="Pensacola">
+    <meta name="geo.position" content="30.4213;-87.2169">
+    <meta name="ICBM" content="30.4213, -87.2169">
+    
+    <!-- Structured Data - LocalBusiness -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PensacolaLights",
+      "description": "Interactive map and guide to Christmas light displays in Pensacola, Florida",
+      "url": "https://pensacolalights.app",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Pensacola",
+        "containedInPlace": {
+          "@type": "State",
+          "name": "Florida"
+        }
+      }
+    }
+    </script>
+    
+    <!-- Preconnect to external domains for faster loading -->
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts - preload for faster rendering -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"></noscript>
+    
+    <!-- Leaflet CSS - load async since map isn't immediately critical -->
+    <link rel="preload" as="style" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
+    
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7400419452639000" crossorigin="anonymous"></script>
+    
+    <!-- Critical inline CSS for initial render -->
+    <style>
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+        color: #0f172a;
+        line-height: 1.5;
+      }
+      #root {
+        min-height: 100vh;
+        width: 100%;
+      }
+      .loading-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #f8fafc;
+      }
+      /* Prevent layout shift */
+      .h-screen { height: 100vh; }
+      .w-screen { width: 100vw; }
+      .flex { display: flex; }
+      .relative { position: relative; }
+      .overflow-hidden { overflow: hidden; }
+      .bg-gray-50 { background-color: #f8fafc; }
+      .text-slate-900 { color: #0f172a; }
+    </style>
+</head>
+  <body class="bg-gray-50 text-slate-900 min-h-screen overflow-x-hidden">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

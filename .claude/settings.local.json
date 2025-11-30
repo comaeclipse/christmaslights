@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(wrangler whoami:*)",
+      "Bash(wrangler d1 create:*)",
+      "Bash(wrangler d1 execute:*)",
+      "Bash(node -e:*)",
+      "Bash(wrangler pages secret:*)",
+      "Bash(npm run build:*)",
+      "Bash(wrangler pages deploy:*)",
+      "Bash(cat:*)",
+      "Bash(npm run pages:deploy:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

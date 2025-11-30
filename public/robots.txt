@@ -1,0 +1,10 @@
+# robots.txt for PensacolaLights
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://pensacolalights.app/sitemap.xml
+
+# Disallow admin pages from indexing
+Disallow: /admin
+

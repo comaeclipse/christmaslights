@@ -1,0 +1,7 @@
+{
+  "name": "PensacolaLights",
+  "description": "A festive guide to the best Christmas light displays in Pensacola, featuring an interactive map and AI-powered discovery.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

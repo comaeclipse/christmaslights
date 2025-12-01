@@ -30,3 +30,5 @@ migrations/
 *.njsproj
 *.sln
 *.sw?
+
+.vercel

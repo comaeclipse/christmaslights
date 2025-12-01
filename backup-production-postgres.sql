@@ -1,0 +1,63 @@
+-- PostgreSQL-ready import derived from backup-production.sql (SQLite/D1)
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS locations (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  lat DOUBLE PRECISION NOT NULL,
+  lng DOUBLE PRECISION NOT NULL,
+  featured INTEGER DEFAULT 0,
+  address TEXT,
+  schedule TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  notes TEXT,
+  radio_station TEXT
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,
+  location_id TEXT NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  text TEXT NOT NULL,
+  author TEXT NOT NULL,
+  date TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  ip_address TEXT
+);
+
+TRUNCATE TABLE reviews, locations RESTART IDENTITY CASCADE;
+
+INSERT INTO locations (id, title, description, lat, lng, featured, address, schedule, created_at, updated_at, notes, radio_station) VALUES
+('loc_1764534306429','6100 Cheyenne Dr, Milton, FL 32570','The show starts after 5:10pm, repeats until midnight, and will be up until New Years. Tune your car radio to 97.1 FM to hear the music.',30.683256258024382,-87.06692018464182,0,'6100 Cheyenne Dr, Milton, FL 32570','5:10PM - 11:59PM','2025-11-30 20:25:06','2025-11-30 20:57:32',NULL,'97.1'),
+('loc_1764534872330','2519 Longleaf Dr, Pensacola, FL 32526','30.486033328234946, -87.29410834053371',30.486033328234946,-87.29410834053371,0,'2519 Longleaf Dr, Pensacola, FL 32526',E'5PM - 11PM Fri & Sat\n5PM - 9:30PM Sun-Thurs','2025-11-30 20:34:32','2025-11-30 20:57:20',NULL,'107.9'),
+('loc_1764537925071','2502 Dunn St, Pensacola, FL 32526','2502 Dunn St, Pensacola, FL 32526',30.47028420103148,-87.29560321277988,0,'2502 Dunn St, Pensacola, FL 32526',NULL,'2025-11-30 21:25:25','2025-11-30 21:25:25',NULL,NULL),
+('loc_1764538152811','3281 Whistler Dr, Pensacola, FL 32503','3281 Whistler Dr, Pensacola, FL 32503',30.453959578284525,-87.17660437715972,0,'3281 Whistler Dr, Pensacola, FL 32503',NULL,'2025-11-30 21:29:12','2025-11-30 21:29:12',NULL,NULL),
+('loc_1764538219825','3280 Whistler Dr, Pensacola, FL 32503','3280 Whistler Dr, Pensacola, FL 32503',30.454215710160724,-87.17618415175173,0,'3280 Whistler Dr, Pensacola, FL 32503',NULL,'2025-11-30 21:30:19','2025-11-30 21:30:19',NULL,NULL),
+('loc_1764538283161','3751 McClellan Rd, Pensacola, FL 32503','3751 McClellan Rd, Pensacola, FL 32503',30.457282108925504,-87.19408592493495,0,'3751 McClellan Rd, Pensacola, FL 32503','5PM-10PM','2025-11-30 21:31:23','2025-11-30 21:31:23',NULL,NULL),
+('loc_1764538334982','535 Wynnehurst St, Pensacola, FL 32503','535 Wynnehurst St, Pensacola, FL 32503',30.46166027992541,-87.2207978993873,0,'535 Wynnehurst St, Pensacola, FL 32503','5PM-10PM','2025-11-30 21:32:15','2025-11-30 21:32:15',NULL,NULL),
+('loc_1764538385378','533 Tampico Blvd, Pensacola, FL 32506','533 Tampico Blvd, Pensacola, FL 32506',30.40551921630449,-87.33844325576827,0,'533 Tampico Blvd, Pensacola, FL 32506',NULL,'2025-11-30 21:33:05','2025-11-30 21:33:05',NULL,NULL),
+('loc_1764538436475','2300 Interstate Cir, Pensacola, FL 32526','2300 Interstate Cir, Pensacola, FL 32526',30.51669056177621,-87.30613667721762,0,'2300 Interstate Cir, Pensacola, FL 32526',NULL,'2025-11-30 21:33:56','2025-11-30 21:33:56',NULL,'89.9'),
+('loc_1764538487469','6600 Bellview Pines Rd, Pensacola, FL 32526','6600 Bellview Pines Rd, Pensacola, FL 32526',30.47474436450838,-87.28845719169516,0,'6600 Bellview Pines Rd, Pensacola, FL 32526',NULL,'2025-11-30 21:34:47','2025-11-30 21:34:47',NULL,NULL),
+('loc_1764538523793','4819 Randee Cir, Pensacola, FL 32526','4819 Randee Cir, Pensacola, FL 32526',30.459239997027083,-87.3105996790344,0,'4819 Randee Cir, Pensacola, FL 32526',NULL,'2025-11-30 21:35:23','2025-11-30 21:35:23',NULL,NULL),
+('loc_1764538607379','9433 US-90, Milton, FL 32583','9433 US-90, Milton, FL 32583',30.644351792535687,-86.92769209779551,0,'9433 US-90, Milton, FL 32583',NULL,'2025-11-30 21:36:47','2025-11-30 21:36:47',NULL,NULL),
+('loc_1764538778456','4225 Burbank Dr, Milton, FL 32583','4225 Burbank Dr, Milton, FL 32583',30.58787721780073,-87.06763436021323,0,'4225 Burbank Dr, Milton, FL 32583','5:19PM-11:19PM','2025-11-30 21:39:38','2025-11-30 21:39:38',NULL,NULL),
+('loc_1764539154070','6483 Imperial Dr, Milton, FL 32570','6483 Imperial Dr, Milton, FL 32570',30.671235268744198,-87.09721408247509,0,'6483 Imperial Dr, Milton, FL 32570','5PM-10PM','2025-11-30 21:45:54','2025-11-30 21:45:54',NULL,NULL),
+('loc_1764539221623','6132 Bougainvilla Cir, Pensacola, FL 32504','6132 Bougainvilla Cir, Pensacola, FL 32504',30.4958037291783,-87.17954923889343,0,'6132 Bougainvilla Cir, Pensacola, FL 32504','5PM-10PM','2025-11-30 21:47:01','2025-11-30 21:47:01',NULL,NULL),
+('loc_1764539306706','5545 Hibiscus Rd, Pensacola, FL 32504','5545 Hibiscus Rd, Pensacola, FL 32504',30.486573451614184,-87.18029914483601,0,'5545 Hibiscus Rd, Pensacola, FL 32504',NULL,'2025-11-30 21:48:26','2025-11-30 21:48:26',NULL,'89.7'),
+('loc_1764539474640','318 Chattman St, Pensacola, FL 32507','318 Chattman St, Pensacola, FL 32507',30.382608845261085,-87.27937622290581,0,'318 Chattman St, Pensacola, FL 32507','5-9PM','2025-11-30 21:51:14','2025-11-30 21:51:14',NULL,NULL),
+('loc_1764539696175','10790 Beulah Rd, Pensacola, FL 32526','10790 Beulah Rd, Pensacola, FL 32526',30.560789225796988,-87.38331002200592,0,'10790 Beulah Rd, Pensacola, FL 32526',NULL,'2025-11-30 21:54:56','2025-11-30 21:54:56',NULL,NULL),
+('loc_1764545133876','119 Bosque Ct, Cantonment, FL 32533','119 Bosque Ct, Cantonment, FL 32533',30.58482108814796,-87.30534236422127,0,'119 Bosque Ct, Cantonment, FL 32533','6PM-11PM','2025-11-30 23:25:52','2025-11-30 23:25:52',NULL,NULL),
+('loc_1764545230286','2701 N 20th Ave, Pensacola, FL 32503','2701 N 20th Ave, Pensacola, FL 32503',30.4440800412225,-87.19522979402429,0,'2701 N 20th Ave, Pensacola, FL 32503',NULL,'2025-11-30 23:27:10','2025-11-30 23:27:10',NULL,NULL),
+('loc_1764545313322','4661 Rigby Rd, Century, FL 32535','4661 Rigby Rd, Century, FL 32535',30.958762860943988,-87.44735769261555,0,'4661 Rigby Rd, Century, FL 32535',NULL,'2025-11-30 23:28:33','2025-11-30 23:28:33',NULL,NULL),
+('loc_1764545387064','2045 Curry Cir, Pensacola, FL 32504','2045 Curry Cir, Pensacola, FL 32504',30.493892799186913,-87.20227314011824,0,'2045 Curry Cir, Pensacola, FL 32504',NULL,'2025-11-30 23:29:47','2025-11-30 23:29:47',NULL,NULL);
+
+INSERT INTO reviews (id, location_id, rating, text, author, date, created_at, ip_address) VALUES
+('r_1764537442261_dtmq904yp','loc_1764534872330',5,'simply the best!!','A Festive Visitor','2025-11-30T21:17:22.261Z','2025-11-30 21:17:22','173.26.124.20');
+
+CREATE INDEX IF NOT EXISTS idx_locations_featured ON locations(featured);
+CREATE INDEX IF NOT EXISTS idx_reviews_location ON reviews(location_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_date ON reviews(date DESC);
+
+COMMIT;

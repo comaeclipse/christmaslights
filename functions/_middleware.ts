@@ -1,15 +1,21 @@
 import { sign, verify } from '@tsndr/cloudflare-worker-jwt';
 import { Env } from './types';
 
-export async function createJWT(payload: Record<string, any>, secret: string): Promise<string> {
-  const token = await sign({
-    ...payload,
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60)
-  }, secret);
+const DEFAULT_SECRET = 'change-me-secret';
+const getSecret = (envSecret?: string | null) => envSecret || DEFAULT_SECRET;
+
+export async function createJWT(payload: Record<string, any>, secret?: string): Promise<string> {
+  const token = await sign(
+    {
+      ...payload,
+      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+    },
+    getSecret(secret)
+  );
   return token;
 }
 
-export async function verifyJWT(authHeader: string | null, secret: string): Promise<boolean> {
+export async function verifyJWT(authHeader: string | null, secret?: string): Promise<boolean> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return false;
   }
@@ -17,7 +23,7 @@ export async function verifyJWT(authHeader: string | null, secret: string): Prom
   const token = authHeader.substring(7);
 
   try {
-    const isValid = await verify(token, secret);
+    const isValid = await verify(token, getSecret(secret));
     return isValid;
   } catch (error) {
     console.error('JWT verification error:', error);

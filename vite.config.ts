@@ -20,31 +20,10 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
-        cssCodeSplit: true,
         rollupOptions: {
           input: {
             main: path.resolve(__dirname, 'index.html'),
             admin: path.resolve(__dirname, 'admin.html'),
-          },
-          output: {
-            manualChunks: (id) => {
-              // Separate Mapbox CSS/JS into its own chunk
-              if (id.includes('mapbox-gl')) {
-                return 'mapbox';
-              }
-              // Separate Leaflet CSS/JS into its own chunk
-              if (id.includes('leaflet') || id.includes('react-leaflet')) {
-                return 'leaflet';
-              }
-              // Separate React and React DOM
-              if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-                return 'react-vendor';
-              }
-              // Separate router
-              if (id.includes('react-router')) {
-                return 'router';
-              }
-            },
           },
         },
       },

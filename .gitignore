@@ -17,6 +17,11 @@ dist-ssr
 .wrangler
 wrangler.toml.backup
 
+# Local DB backups
+backup-production-postgres.sql
+backup-production.sql
+backup.sql
+
 # Database migrations
 migrations/
 

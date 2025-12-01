@@ -32,6 +32,13 @@ const StarRatingDisplay: React.FC<{ rating: number; size?: 'sm' | 'md' }> = ({ r
 };
 
 const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationId, onLocationSelect, onAddReview, isOpen, toggleSidebar }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 768);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   
   // Review Form State
   const [reviewRating, setReviewRating] = useState(0);
@@ -77,34 +84,43 @@ const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationI
   const selectedLocation = locations.find(l => l.id === selectedLocationId);
   const locationReviews = selectedLocationId ? reviews.filter(r => r.locationId === selectedLocationId) : [];
 
+  const mobileTranslate = isOpen ? 'translate-y-0' : 'translate-y-[calc(100%-72px)]';
+  const desktopTranslate = isOpen ? 'translate-x-0' : '-translate-x-full';
+
   return (
     <div 
-      className={`fixed top-0 left-0 h-full w-full md:w-96 bg-white/95 backdrop-blur-md border-r border-slate-200 transform transition-transform duration-300 ease-in-out z-20 flex flex-col shadow-xl ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+      className={`fixed bg-white/95 backdrop-blur-md border-slate-200 transform transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-2xl
+        ${isMobile 
+          ? `bottom-0 left-0 right-0 h-[72vh] rounded-t-3xl border-t ${mobileTranslate}` 
+          : `top-0 left-0 h-full w-full md:w-96 border-r ${desktopTranslate}`}`}
     >
       {/* Header */}
-      <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
+      <div className={`flex items-center bg-white border-b border-slate-200 ${isMobile ? 'p-4 rounded-t-3xl relative' : 'p-6'}`}>
+        {isMobile && (
+          <div className="absolute left-1/2 -translate-x-1/2 -top-3 h-1.5 w-14 rounded-full bg-slate-200"></div>
+        )}
         <div className="cursor-pointer" onClick={() => onLocationSelect(null)}>
-          <h1 className="font-display text-3xl text-slate-800 tracking-tight">PensacolaLights</h1>
-          <p className="text-xs text-slate-500 uppercase tracking-widest">Christmas Light Guide</p>
+          <h1 className="font-display text-2xl md:text-3xl text-slate-800 tracking-tight">PensacolaLights</h1>
+          <p className="text-[11px] md:text-xs text-slate-500 uppercase tracking-widest">Christmas Light Guide</p>
         </div>
         
-        <button 
-          onClick={toggleSidebar}
-          className="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2 px-4 rounded-full transition-colors border border-slate-200 shadow-sm"
-        >
-          View Map
-        </button>
-
-        <button 
-          onClick={toggleSidebar}
-          className="md:hidden text-slate-500 hover:text-slate-800"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button 
+            onClick={toggleSidebar}
+            className="md:hidden bg-slate-900 text-white text-xs font-bold py-2 px-3 rounded-full shadow hover:bg-slate-800 transition-colors"
+          >
+            {isOpen ? 'Close' : 'Open'}
+          </button>
+          <button 
+            onClick={toggleSidebar}
+            className="md:hidden text-slate-500 hover:text-slate-800"
+            aria-label="Toggle list"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Content */}

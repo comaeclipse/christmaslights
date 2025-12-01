@@ -16,7 +16,10 @@ const Home: React.FC<{
   setReviews: React.Dispatch<React.SetStateAction<Review[]>>;
 }> = ({ locations, reviews, setReviews }) => {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth >= 768; // default closed on mobile, open on desktop
+  });
 
   // Cookie helper to prevent duplicate reviews
   const hasReviewed = (locationId: string): boolean => {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PensacolaLights is a Christmas lights display mapping application that allows users to browse and review holiday light displays. The application supports two deployment platforms: **Cloudflare Pages** (with D1 database) and **Vercel** (with PostgreSQL).
+PensacolaLights is a Christmas lights display mapping application that allows users to browse and review holiday light displays. The application is deployed on **Vercel** with a **PostgreSQL** database (Neon).
 
 ## Development Commands
 
@@ -20,39 +20,15 @@ npm run build        # Build for production (outputs to dist/)
 npm run preview      # Preview production build locally
 ```
 
-### Cloudflare Pages Development
-```bash
-npm run pages:dev    # Run Cloudflare Pages dev server with functions
-npm run pages:deploy # Build and deploy to Cloudflare Pages
-```
-
-### Database Management (Cloudflare D1)
-```bash
-npm run db:create    # Create D1 database
-npm run db:migrate   # Run migrations (0001_initial_schema.sql, 0002_seed_data.sql)
-```
-
 ## Architecture
 
-### Dual Platform Support
+### Backend (Vercel Serverless Functions)
 
-This codebase maintains **two separate backend implementations** that serve the same frontend:
-
-1. **Cloudflare Pages + D1** (`functions/` directory)
-   - Uses Cloudflare Workers for serverless functions
-   - D1 database (SQLite-based)
-   - Located in `functions/api/` and `functions/[[path]].ts`
-   - JWT auth via `@tsndr/cloudflare-worker-jwt`
-   - Types defined in `functions/types.ts`
-
-2. **Vercel + PostgreSQL** (`api/` directory)
-   - Uses Vercel Serverless Functions
-   - PostgreSQL database via `pg` library
-   - Located in `api/` directory
-   - JWT auth via `@tsndr/cloudflare-worker-jwt`
-   - Database connection in `api/_db.ts`
-
-**Key Point**: When modifying API endpoints or database logic, you must update BOTH `functions/api/` and `api/` directories to maintain platform parity.
+The backend is built with **Vercel Serverless Functions** located in the `api/` directory:
+- Uses **PostgreSQL** database (Neon) via `pg` library
+- JWT authentication via `@tsndr/cloudflare-worker-jwt` (despite the name, it's just a JWT library)
+- Database connection pool configured in `api/_db.ts`
+- Auth utilities in `api/_auth.ts`
 
 ### Frontend Architecture
 
@@ -98,26 +74,20 @@ Core entities:
 
 ### Database Field Mapping
 
-Both backends map snake_case database fields to camelCase for the frontend:
+Backend maps snake_case database fields to camelCase for the frontend:
 - `radio_station` → `radioStation`
 
 ### Environment Variables
 
-**Cloudflare Pages** (`functions/` expects):
-- `DB`: D1 Database binding
-- `GEMINI_API_KEY`: API key for AI features
-- `ADMIN_PASSWORD`: Admin authentication password
-- `JWT_SECRET`: JWT signing secret (fallback: `'change-me-secret'`)
-
-**Vercel** (`api/` expects):
-- `DATABASE_URL` / `POSTGRES_URL` / `POSTGRES_PRISMA_URL`: PostgreSQL connection string
+Required environment variables (set in Vercel dashboard):
+- `DATABASE_URL` / `POSTGRES_URL` / `POSTGRES_PRISMA_URL`: PostgreSQL connection string (Neon)
 - `GEMINI_API_KEY`: API key for AI features
 - `ADMIN_PASSWORD`: Admin authentication password
 - `JWT_SECRET`: JWT signing secret (fallback: `'change-me-secret'`)
 
 ### CORS Headers
 
-Both backends return CORS headers on all JSON responses:
+API responses include CORS headers:
 ```javascript
 'Access-Control-Allow-Origin': '*'
 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
@@ -128,17 +98,12 @@ Both backends return CORS headers on all JSON responses:
 
 ```
 ├── api/                       # Vercel serverless functions
-│   ├── _auth.ts              # JWT utilities for Vercel
+│   ├── _auth.ts              # JWT utilities
 │   ├── _db.ts                # PostgreSQL connection pool
 │   ├── auth/login.ts         # Admin login endpoint
 │   ├── locations.ts          # Public locations endpoint
 │   ├── reviews.ts            # Public reviews endpoint
 │   └── admin/                # Protected admin endpoints
-├── functions/                 # Cloudflare Pages functions
-│   ├── types.ts              # Cloudflare-specific types (Env)
-│   ├── _middleware.ts        # JWT utilities for Cloudflare
-│   ├── [[path]].ts           # SPA catch-all route
-│   └── api/                  # API routes (mirror api/)
 ├── components/                # React components
 │   ├── LightMap.tsx          # Leaflet map implementation
 │   ├── MapboxMap.tsx         # Mapbox GL map implementation
@@ -153,8 +118,8 @@ Both backends return CORS headers on all JSON responses:
 
 ## When Making Changes
 
-1. **API endpoints**: Update both `functions/api/` and `api/` to maintain platform parity
-2. **Database queries**: Ensure both D1 (SQLite) and PostgreSQL syntax compatibility
-3. **Authentication**: Both platforms use the same JWT library and patterns
-4. **Environment setup**: Verify environment variables for target platform
-5. **Map components**: Remember there are two separate map implementations (Leaflet and Mapbox)
+1. **API endpoints**: Located in `api/` directory - use PostgreSQL syntax (`$1`, `$2` parameter placeholders)
+2. **Database queries**: PostgreSQL via `pg` library - connection pool in `api/_db.ts`
+3. **Authentication**: JWT tokens with 24-hour expiry, verified via `api/_auth.ts`
+4. **Environment setup**: Set environment variables in Vercel dashboard
+5. **Map components**: Remember there are two separate map implementations (Leaflet on `/`, Mapbox on `/demo`)

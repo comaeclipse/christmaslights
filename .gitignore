@@ -12,11 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Cloudflare
-.dev.vars
-.wrangler
-wrangler.toml.backup
-
 # Local DB backups
 backup-production-postgres.sql
 backup-production.sql

@@ -1,8 +1,0 @@
-name = "pensacolalights"
-compatibility_date = "2024-11-01"
-pages_build_output_dir = "dist"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "pensacolalights-db"
-database_id = "754b7580-8e3d-4f65-8d91-ca7359adfc8b"

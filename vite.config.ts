@@ -34,20 +34,6 @@ export default defineConfig(({ mode }) => {
             main: path.resolve(__dirname, 'index.html'),
             admin: path.resolve(__dirname, 'admin.html'),
           },
-          output: {
-            manualChunks(id) {
-              // Leaflet mapping - separate chunk since it's large and lazy-loaded
-              if (id.includes('node_modules/leaflet') ||
-                  id.includes('node_modules/react-leaflet')) {
-                return 'vendor-leaflet';
-              }
-              // All other node_modules go into vendor chunk (including React)
-              // This ensures React loads with other dependencies in correct order
-              if (id.includes('node_modules/')) {
-                return 'vendor';
-              }
-            },
-          },
         },
       },
     };

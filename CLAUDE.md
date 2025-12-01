@@ -78,7 +78,6 @@ Backend maps snake_case database fields to camelCase for the frontend:
 
 Required environment variables (set in Vercel dashboard):
 - `DATABASE_URL` / `POSTGRES_URL` / `POSTGRES_PRISMA_URL`: PostgreSQL connection string (Neon)
-- `GEMINI_API_KEY`: API key for AI features
 - `ADMIN_PASSWORD`: Admin authentication password
 - `JWT_SECRET`: JWT signing secret (fallback: `'change-me-secret'`)
 

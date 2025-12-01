@@ -4,7 +4,9 @@ import crypto from 'node:crypto';
 
 const mapReview = (row: any) => ({
   id: row.id,
+  // Return both snake_case and camelCase for compatibility with existing clients
   location_id: row.location_id,
+  locationId: row.location_id,
   rating: row.rating,
   text: row.text,
   author: row.author,

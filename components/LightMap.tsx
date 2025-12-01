@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import L, { type TileEvent } from 'leaflet';
 import { LocationData, Review } from '../types';
 import { PENSACOLA_CENTER } from '../constants';
 
@@ -47,6 +47,7 @@ const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
 const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocationId, onSelectLocation }) => {
   const selectedLoc = locations.find(l => l.id === selectedLocationId);
   const center = selectedLoc ? [selectedLoc.lat, selectedLoc.lng] as [number, number] : PENSACOLA_CENTER;
+  const prioritizedTilesRef = useRef(0);
 
   const getAvgRating = (id: string) => {
     const locReviews = reviews.filter(r => r.locationId === id);
@@ -66,6 +67,15 @@ const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocatio
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           maxZoom={20}
+          eventHandlers={{
+            tileloadstart: (event: TileEvent) => {
+              // Nudge the first few tiles to high priority to help LCP.
+              if (prioritizedTilesRef.current < 4 && event.tile) {
+                event.tile.setAttribute('fetchpriority', 'high');
+                prioritizedTilesRef.current += 1;
+              }
+            },
+          }}
         />
         <MapUpdater center={center} />
         

@@ -36,19 +36,13 @@ export default defineConfig(({ mode }) => {
           },
           output: {
             manualChunks(id) {
-              // React core libraries
-              if (id.includes('node_modules/react/') ||
-                  id.includes('node_modules/react-dom/') ||
-                  id.includes('node_modules/scheduler/') ||
-                  id.includes('node_modules/react-router-dom/')) {
-                return 'vendor-react';
-              }
-              // Leaflet mapping
+              // Leaflet mapping - separate chunk since it's large and lazy-loaded
               if (id.includes('node_modules/leaflet') ||
                   id.includes('node_modules/react-leaflet')) {
                 return 'vendor-leaflet';
               }
-              // Other node_modules
+              // All other node_modules go into vendor chunk (including React)
+              // This ensures React loads with other dependencies in correct order
               if (id.includes('node_modules/')) {
                 return 'vendor';
               }

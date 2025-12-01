@@ -48,10 +48,6 @@ export default defineConfig(({ mode }) => {
                   id.includes('node_modules/react-leaflet')) {
                 return 'vendor-leaflet';
               }
-              // Mapbox mapping
-              if (id.includes('node_modules/mapbox-gl')) {
-                return 'vendor-mapbox';
-              }
               // Other node_modules
               if (id.includes('node_modules/')) {
                 return 'vendor';

@@ -15,7 +15,13 @@
       "Bash(npm run pages:deploy:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd missing admin locations API for Vercel\n\nAdds admin endpoints for location management that were missing from the Vercel backend. The Cloudflare functions had these endpoints but they weren''t present in the api/ directory for Vercel deployment.\n\n- Add POST /api/admin/locations to create locations\n- Add GET/PUT/DELETE /api/admin/locations/[id] for single location operations\n- Add CLAUDE.md documentation for codebase architecture and commands\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(start dist/stats.html)"
     ],
     "deny": [],
     "ask": []

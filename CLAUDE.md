@@ -33,11 +33,8 @@ The backend is built with **Vercel Serverless Functions** located in the `api/` 
 ### Frontend Architecture
 
 - **Framework**: React 19 with TypeScript, built with Vite
-- **Routing**: React Router (routes: `/`, `/demo`, `/privacy`, `/legal`)
-- **Mapping Libraries**:
-  - Leaflet (default, used on `/` route via `LightMap` component)
-  - Mapbox GL (demo, used on `/demo` route via `MapboxMap` component)
-  - Both are lazy-loaded to split bundles
+- **Routing**: React Router (routes: `/`, `/privacy`, `/legal`)
+- **Mapping**: Leaflet (via `LightMap` component, lazy-loaded)
 - **State Management**: React hooks (no external state library)
 - **Styling**: Tailwind CSS v4
 - **Multi-page Build**: Vite builds two entry points:
@@ -106,12 +103,11 @@ API responses include CORS headers:
 │   └── admin/                # Protected admin endpoints
 ├── components/                # React components
 │   ├── LightMap.tsx          # Leaflet map implementation
-│   ├── MapboxMap.tsx         # Mapbox GL map implementation
 │   ├── Sidebar.tsx           # Location list and review UI
 │   └── Manage.tsx            # Admin panel component
 ├── services/
 │   └── apiClient.ts          # Centralized API client
-├── App.tsx                    # Main application (Home + Demo routes)
+├── App.tsx                    # Main application
 ├── admin.tsx                  # Admin panel entry point
 └── types.ts                   # Shared TypeScript types
 ```
@@ -122,4 +118,4 @@ API responses include CORS headers:
 2. **Database queries**: PostgreSQL via `pg` library - connection pool in `api/_db.ts`
 3. **Authentication**: JWT tokens with 24-hour expiry, verified via `api/_auth.ts`
 4. **Environment setup**: Set environment variables in Vercel dashboard
-5. **Map components**: Remember there are two separate map implementations (Leaflet on `/`, Mapbox on `/demo`)
+5. **Map component**: Uses Leaflet for map rendering, lazy-loaded for performance

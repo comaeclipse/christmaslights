@@ -15,7 +15,6 @@
     "@tsndr/cloudflare-worker-jwt": "^2.4.0",
     "@vercel/speed-insights": "^1.2.0",
     "leaflet": "^1.9.4",
-    "mapbox-gl": "^3.16.0",
     "pg": "^8.13.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -24,7 +23,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^22.14.0",
     "@vercel/node": "^3.2.6",
     "@vitejs/plugin-react": "^5.0.0",

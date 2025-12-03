@@ -8,12 +8,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
     return handleGet(req, res);
   }
-  if (req.method === 'DELETE') {
-    // Prefer /api/admin/reviews/[id] for deletes, but handle here if id provided
-    const id = (req.query.id as string | undefined) || undefined;
-    if (!id) return res.status(400).json({ error: 'Review id is required' });
-    return handleDelete(req, res, id);
-  }
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
@@ -32,7 +26,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   try {
     const { rows } = await query(
       `
-        SELECT 
+        SELECT
           r.id,
           r.location_id,
           r.location_id AS "locationId",
@@ -52,20 +46,5 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('Failed to fetch admin reviews', error);
     res.status(500).json({ error: 'Failed to fetch reviews' });
-  }
-}
-
-async function handleDelete(req: VercelRequest, res: VercelResponse, id: string) {
-  if (!(await ensureAuth(req, res))) return;
-
-  try {
-    const { rowCount } = await query('DELETE FROM reviews WHERE id = $1', [id]);
-    if (rowCount === 0) {
-      return res.status(404).json({ error: 'Review not found' });
-    }
-    res.status(204).end();
-  } catch (error) {
-    console.error('Failed to delete review', error);
-    res.status(500).json({ error: 'Failed to delete review' });
   }
 }

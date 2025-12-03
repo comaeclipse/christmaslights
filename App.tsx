@@ -94,6 +94,7 @@ const Home: React.FC<{
             reviews={reviews}
             selectedLocationId={selectedLocationId}
             onSelectLocation={handleLocationSelect}
+            isSidebarOpen={isSidebarOpen}
           />
         </Suspense>
 

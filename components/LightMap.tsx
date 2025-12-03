@@ -34,17 +34,34 @@ interface LightMapProps {
   reviews: Review[];
   selectedLocationId: string | null;
   onSelectLocation: (id: string | null) => void;
+  isSidebarOpen: boolean;
 }
 
-const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
+const MapUpdater: React.FC<{ center: [number, number]; isSidebarOpen: boolean }> = ({ center, isSidebarOpen }) => {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, 13);
-  }, [center, map]);
+    const isMobile = window.innerWidth < 768;
+
+    // Fly to the location
+    map.flyTo(center, 13, { duration: 0.8 });
+
+    // On mobile with sidebar open, adjust the view so marker is visible above the sidebar
+    if (isMobile && isSidebarOpen) {
+      // The sidebar is 72vh tall, so we need to shift the map upward
+      // Calculate the offset: shift up by ~22vh (which centers marker in visible 28vh area)
+      const viewportHeight = window.innerHeight;
+      const offsetPixels = viewportHeight * 0.22; // 22% of viewport height
+
+      // Pan upward after a short delay to let flyTo start
+      setTimeout(() => {
+        map.panBy([0, offsetPixels], { animate: true, duration: 0.3 });
+      }, 100);
+    }
+  }, [center, map, isSidebarOpen]);
   return null;
 };
 
-const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocationId, onSelectLocation }) => {
+const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocationId, onSelectLocation, isSidebarOpen }) => {
   const selectedLoc = locations.find(l => l.id === selectedLocationId);
   const center = selectedLoc ? [selectedLoc.lat, selectedLoc.lng] as [number, number] : PENSACOLA_CENTER;
   const prioritizedTilesRef = useRef(0);
@@ -57,9 +74,9 @@ const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocatio
 
   return (
     <div className="h-full w-full z-0 relative">
-      <MapContainer 
-        center={PENSACOLA_CENTER} 
-        zoom={12} 
+      <MapContainer
+        center={PENSACOLA_CENTER}
+        zoom={12}
         style={{ height: '100%', width: '100%', background: '#f8fafc' }}
         zoomControl={false}
       >
@@ -77,7 +94,7 @@ const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocatio
             },
           }}
         />
-        <MapUpdater center={center} />
+        <MapUpdater center={center} isSidebarOpen={isSidebarOpen} />
         
         {locations.map((loc) => {
           const rating = getAvgRating(loc.id);

@@ -129,8 +129,11 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     try {
       const data = await api.adminGetReviews(authToken);
       setReviews(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load reviews:', error);
+      if (error.status === 401) {
+        handle401Error(error);
+      }
     } finally {
       setLoadingReviews(false);
     }
@@ -143,9 +146,13 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     try {
       await api.adminDeleteReview(id, authToken);
       setReviews(prev => prev.filter(r => r.id !== id));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete review:', error);
-      alert('Failed to delete review');
+      if (error.status === 401) {
+        handle401Error(error);
+      } else {
+        alert('Failed to delete review');
+      }
     }
   };
 
@@ -162,6 +169,20 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
       console.error('Login failed:', error);
       alert('Incorrect password');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    setAuthToken(null);
+    setIsAuthenticated(false);
+    setPassword('');
+  };
+
+  const handle401Error = (error: any) => {
+    // If we get a 401 error, the token has likely expired
+    console.error('Authentication error:', error);
+    alert('Your session has expired. Please log in again.');
+    handleLogout();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -203,9 +224,14 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
         lng: -87.2169,
         featured: false,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save:', error);
-      alert('Failed to save location. Please try again.');
+      // Check if it's an authentication error (401)
+      if (error.status === 401) {
+        handle401Error(error);
+      } else {
+        alert('Failed to save location. Please try again.');
+      }
     }
   };
 
@@ -221,9 +247,13 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     try {
       await api.adminDeleteLocation(id, authToken);
       setLocations(prev => prev.filter(l => l.id !== id));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete:', error);
-      alert('Failed to delete location');
+      if (error.status === 401) {
+        handle401Error(error);
+      } else {
+        alert('Failed to delete location');
+      }
     }
   };
 
@@ -261,9 +291,17 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
        <div className="max-w-6xl mx-auto">
          <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-slate-900">Admin Panel</h1>
-            <a href="/" className="bg-white border border-slate-300 px-4 py-2 rounded text-slate-700 hover:bg-slate-50">
-               Return to Map
-            </a>
+            <div className="flex gap-2">
+              <button
+                onClick={handleLogout}
+                className="bg-white border border-slate-300 px-4 py-2 rounded text-slate-700 hover:bg-slate-50"
+              >
+                Logout
+              </button>
+              <a href="/" className="bg-white border border-slate-300 px-4 py-2 rounded text-slate-700 hover:bg-slate-50">
+                Return to Map
+              </a>
+            </div>
          </div>
 
          {/* Tabs */}

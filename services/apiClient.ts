@@ -66,7 +66,11 @@ class ApiClient {
       },
       body: JSON.stringify(location),
     });
-    if (!res.ok) throw new Error('Failed to create location');
+    if (!res.ok) {
+      const error: any = new Error('Failed to create location');
+      error.status = res.status;
+      throw error;
+    }
     return res.json();
   }
 
@@ -83,7 +87,11 @@ class ApiClient {
       },
       body: JSON.stringify(updates),
     });
-    if (!res.ok) throw new Error('Failed to update location');
+    if (!res.ok) {
+      const error: any = new Error('Failed to update location');
+      error.status = res.status;
+      throw error;
+    }
     return res.json();
   }
 
@@ -92,14 +100,22 @@ class ApiClient {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error('Failed to delete location');
+    if (!res.ok) {
+      const error: any = new Error('Failed to delete location');
+      error.status = res.status;
+      throw error;
+    }
   }
 
   async adminGetReviews(token: string): Promise<(Review & { ipAddress?: string; locationTitle?: string })[]> {
     const res = await fetch(`${API_BASE}/admin/reviews`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error('Failed to fetch reviews');
+    if (!res.ok) {
+      const error: any = new Error('Failed to fetch reviews');
+      error.status = res.status;
+      throw error;
+    }
     return res.json();
   }
 
@@ -108,7 +124,11 @@ class ApiClient {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error('Failed to delete review');
+    if (!res.ok) {
+      const error: any = new Error('Failed to delete review');
+      error.status = res.status;
+      throw error;
+    }
   }
 }
 

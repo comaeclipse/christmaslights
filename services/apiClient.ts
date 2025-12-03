@@ -1,6 +1,6 @@
 import { LocationData, Review } from '../types';
 
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:8788/api';
+const API_BASE = '/api'; // Works for both Vercel dev (port 3000) and production
 
 class ApiClient {
   async getLocations(): Promise<LocationData[]> {

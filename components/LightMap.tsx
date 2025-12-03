@@ -47,15 +47,15 @@ const MapUpdater: React.FC<{ center: [number, number]; isSidebarOpen: boolean }>
 
     // On mobile with sidebar open, adjust the view so marker is visible above the sidebar
     if (isMobile && isSidebarOpen) {
-      // The sidebar is 72vh tall, so we need to shift the map upward
-      // Calculate the offset: shift up by ~22vh (which centers marker in visible 28vh area)
+      // The sidebar covers bottom 72vh. Visible area is top 28vh.
+      // Pan map down (positive Y) to move marker up into visible area
       const viewportHeight = window.innerHeight;
-      const offsetPixels = viewportHeight * 0.22; // 22% of viewport height
+      const offsetPixels = viewportHeight * 0.27; // 27% of viewport height
 
-      // Pan upward after a short delay to let flyTo start
+      // Pan map down (positive Y) to move marker up on screen, after flyTo completes
       setTimeout(() => {
         map.panBy([0, offsetPixels], { animate: true, duration: 0.3 });
-      }, 100);
+      }, 900); // Wait for flyTo to complete (800ms + 100ms buffer)
     }
   }, [center, map, isSidebarOpen]);
   return null;

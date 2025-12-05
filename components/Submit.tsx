@@ -100,20 +100,20 @@ const Submit: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
             Submit a Location
           </h1>
-          <p className="text-slate-300 text-sm">
+          <p className="text-slate-600 text-sm">
             Suggest a Christmas lights display to be added to the map
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg shadow-xl p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
           {submitSuccess ? (
             // Success Message
             <div className="text-center py-8">
@@ -208,7 +208,7 @@ const Submit: React.FC = () => {
         <div className="text-center mt-6">
           <a
             href="/"
-            className="text-slate-300 hover:text-white text-sm underline"
+            className="text-slate-600 hover:text-slate-900 text-sm underline"
           >
             ← Back to Map
           </a>

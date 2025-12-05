@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LocationData, Review } from '../types';
+import { LocationData, Review, LocationSubmission } from '../types';
 import { api } from '../services/apiClient';
 
 interface AdminReview extends Review {
@@ -16,9 +16,11 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'locations' | 'reviews'>('locations');
+  const [activeTab, setActiveTab] = useState<'locations' | 'reviews' | 'submissions'>('locations');
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [submissions, setSubmissions] = useState<LocationSubmission[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Partial<LocationData>>({
@@ -123,6 +125,13 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     }
   }, [activeTab, authToken]);
 
+  // Load submissions when switching to submissions tab
+  useEffect(() => {
+    if (activeTab === 'submissions' && authToken && submissions.length === 0) {
+      loadSubmissions();
+    }
+  }, [activeTab, authToken]);
+
   const loadReviews = async () => {
     if (!authToken) return;
     setLoadingReviews(true);
@@ -139,6 +148,22 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     }
   };
 
+  const loadSubmissions = async () => {
+    if (!authToken) return;
+    setLoadingSubmissions(true);
+    try {
+      const data = await api.adminGetSubmissions(authToken);
+      setSubmissions(data);
+    } catch (error: any) {
+      console.error('Failed to load submissions:', error);
+      if (error.status === 401) {
+        handle401Error(error);
+      }
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
   const handleDeleteReview = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     if (!authToken) return;
@@ -152,6 +177,23 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
         handle401Error(error);
       } else {
         alert('Failed to delete review');
+      }
+    }
+  };
+
+  const handleDeleteSubmission = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this submission?')) return;
+    if (!authToken) return;
+
+    try {
+      await api.adminDeleteSubmission(id, authToken);
+      setSubmissions(prev => prev.filter(s => s.id !== id));
+    } catch (error: any) {
+      console.error('Failed to delete submission:', error);
+      if (error.status === 401) {
+        handle401Error(error);
+      } else {
+        alert('Failed to delete submission');
       }
     }
   };
@@ -319,12 +361,22 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
             <button
               onClick={() => setActiveTab('reviews')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'reviews' 
-                  ? 'bg-slate-900 text-white' 
+                activeTab === 'reviews'
+                  ? 'bg-slate-900 text-white'
                   : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
               }`}
             >
               ⭐ Reviews ({reviews.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'submissions'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+              }`}
+            >
+              📝 Submissions ({submissions.length})
             </button>
          </div>
 
@@ -525,6 +577,81 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                <button 
                                  onClick={() => handleDeleteReview(review.id)} 
+                                 className="text-red-600 hover:text-red-900"
+                               >
+                                 Delete
+                               </button>
+                            </td>
+                         </tr>
+                      ))}
+                   </tbody>
+                </table>
+              </div>
+            )}
+         </div>
+         )}
+
+         {activeTab === 'submissions' && (
+         <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-slate-900">Location Submissions</h2>
+              <button
+                onClick={loadSubmissions}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+            {loadingSubmissions ? (
+              <div className="p-8 text-center text-slate-500">Loading submissions...</div>
+            ) : submissions.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">No submissions yet</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                   <thead className="bg-gray-50">
+                      <tr>
+                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Info</th>
+                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                   </thead>
+                   <tbody className="bg-white divide-y divide-gray-200">
+                      {submissions.map((submission) => (
+                         <tr key={submission.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                               <div className="text-sm font-medium text-gray-900 max-w-[200px]" title={submission.address}>
+                                 {submission.address}
+                               </div>
+                            </td>
+                            <td className="px-4 py-3">
+                               <div className="text-sm text-gray-700 max-w-[200px] truncate" title={submission.additionalInfo || ''}>
+                                 {submission.additionalInfo || '-'}
+                               </div>
+                            </td>
+                            <td className="px-4 py-3">
+                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                 submission.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                 submission.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                 'bg-red-100 text-red-800'
+                               }`}>
+                                 {submission.status}
+                               </span>
+                            </td>
+                            <td className="px-4 py-3">
+                               <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
+                                 {submission.ipAddress || 'N/A'}
+                               </code>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-500">
+                               {new Date(submission.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                               <button
+                                 onClick={() => handleDeleteSubmission(submission.id)}
                                  className="text-red-600 hover:text-red-900"
                                >
                                  Delete

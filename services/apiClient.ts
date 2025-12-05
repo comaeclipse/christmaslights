@@ -154,6 +154,30 @@ class ApiClient {
       throw error;
     }
   }
+
+  async adminGetSubmissions(token: string): Promise<LocationSubmission[]> {
+    const res = await fetch(`${API_BASE}/admin/submissions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const error: any = new Error('Failed to fetch submissions');
+      error.status = res.status;
+      throw error;
+    }
+    return res.json();
+  }
+
+  async adminDeleteSubmission(id: string, token: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/admin/submissions?id=${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const error: any = new Error('Failed to delete submission');
+      error.status = res.status;
+      throw error;
+    }
+  }
 }
 
 export const api = new ApiClient();

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from './_db.js';
-import { verify } from '@tsndr/cloudflare-worker-jwt';
+import { verify, decode } from '@tsndr/cloudflare-worker-jwt';
 import crypto from 'node:crypto';
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'change-me-secret';
@@ -27,15 +27,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Verify JWT token and extract answer
-    const decoded = await verify(captchaToken, getJwtSecret());
+    // Verify JWT token signature and expiration
+    const isValid = await verify(captchaToken, getJwtSecret());
 
-    if (!decoded) {
+    if (!isValid) {
       return res.status(401).json({ error: 'Invalid or expired captcha token' });
     }
 
+    // Decode JWT to get payload
+    const payload = decode(captchaToken).payload as { answer: number; exp: number };
+
     // Check if captcha answer is correct
-    const payload = decoded as { answer: number; exp: number };
     if (payload.answer !== parseInt(captchaAnswer)) {
       return res.status(400).json({ error: 'Incorrect captcha answer' });
     }

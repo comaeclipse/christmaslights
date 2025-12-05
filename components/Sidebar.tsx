@@ -351,6 +351,7 @@ const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationI
          <div className="flex justify-center gap-4 text-[10px] text-slate-500">
            <Link to="/privacy" className="hover:text-slate-800 hover:underline">Privacy Policy</Link>
            <Link to="/legal" className="hover:text-slate-800 hover:underline">Legal Disclaimer</Link>
+           <a href="/submit.html" className="hover:text-slate-800 hover:underline">Submit Location</a>
          </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { LocationData, Review } from '../types';
+import { LocationData, Review, CaptchaChallenge, LocationSubmission } from '../types';
 
 const API_BASE = '/api'; // Works for both Vercel dev (port 3000) and production
 
@@ -41,6 +41,30 @@ class ApiClient {
       }),
     });
     if (!res.ok) throw new Error('Failed to create review');
+    return res.json();
+  }
+
+  async getCaptcha(): Promise<CaptchaChallenge> {
+    const res = await fetch(`${API_BASE}/captcha`);
+    if (!res.ok) throw new Error('Failed to load captcha');
+    return res.json();
+  }
+
+  async submitLocation(data: {
+    address: string;
+    additionalInfo?: string;
+    captchaAnswer: number;
+    captchaToken: string;
+  }): Promise<LocationSubmission> {
+    const res = await fetch(`${API_BASE}/submissions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Submission failed');
+    }
     return res.json();
   }
 

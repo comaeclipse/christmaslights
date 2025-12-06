@@ -5,6 +5,17 @@ import crypto from 'node:crypto';
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'change-me-secret';
 
+function getRealIP(req: VercelRequest): string | null {
+  // Priority order: CF-Connecting-IP (Cloudflare), X-Real-IP, X-Forwarded-For, socket
+  return (
+    (req.headers['cf-connecting-ip'] as string) ||
+    (req.headers['x-real-ip'] as string) ||
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    null
+  );
+}
+
 const mapSubmission = (row: any) => ({
   id: row.id,
   address: row.address,
@@ -47,10 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const now = new Date().toISOString();
 
     // Extract IP address
-    const ip =
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      req.socket.remoteAddress ||
-      null;
+    const ip = getRealIP(req);
 
     // Extract user agent
     const userAgent = req.headers['user-agent'] || null;

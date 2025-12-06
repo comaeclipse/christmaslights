@@ -41,6 +41,17 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+function getRealIP(req: VercelRequest): string | null {
+  // Priority order: CF-Connecting-IP (Cloudflare), X-Real-IP, X-Forwarded-For, socket
+  return (
+    (req.headers['cf-connecting-ip'] as string) ||
+    (req.headers['x-real-ip'] as string) ||
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    null
+  );
+}
+
 async function handlePost(req: VercelRequest, res: VercelResponse) {
   const { location_id, rating, text, author } = req.body || {};
 
@@ -51,10 +62,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   try {
     const id = `r_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const now = new Date().toISOString();
-    const ip =
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      req.socket.remoteAddress ||
-      null;
+    const ip = getRealIP(req);
 
     const insertQuery = `
       INSERT INTO reviews (id, location_id, rating, text, author, date, created_at, ip_address)

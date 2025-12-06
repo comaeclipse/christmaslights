@@ -4,6 +4,7 @@ import './src/index.css';
 import Manage from './components/Manage';
 import { api } from './services/apiClient';
 import { LocationData } from './types';
+import { Analytics } from '@vercel/analytics/react';
 
 const AdminApp: React.FC = () => {
   const [locations, setLocations] = useState<LocationData[]>([]);
@@ -52,5 +53,6 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <AdminApp />
+    <Analytics />
   </React.StrictMode>
 );

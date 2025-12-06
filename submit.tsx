@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './src/index.css';
 import Submit from './components/Submit';
+import { Analytics } from '@vercel/analytics/react';
 
 const SubmitApp: React.FC = () => {
   return <Submit />;
@@ -16,5 +17,6 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <SubmitApp />
+    <Analytics />
   </React.StrictMode>
 );

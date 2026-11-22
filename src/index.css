@@ -22,3 +22,8 @@
   background: #f8fafc;
   font-family: 'Inter', sans-serif;
 }
+
+/* Light greyscale basemap (similar to the old CARTO Positron look); markers stay red. */
+.map-tiles-grey {
+  filter: grayscale(100%) brightness(1.08) contrast(0.85);
+}

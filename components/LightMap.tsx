@@ -83,6 +83,7 @@ const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocatio
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="map-tiles-grey"
           maxZoom={19}
           eventHandlers={{
             tileloadstart: (event: TileEvent) => {

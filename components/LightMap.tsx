@@ -81,9 +81,9 @@ const LightMap: React.FC<LightMapProps> = ({ locations, reviews, selectedLocatio
         zoomControl={false}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          maxZoom={20}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
           eventHandlers={{
             tileloadstart: (event: TileEvent) => {
               // Nudge the first few tiles to high priority to help LCP.

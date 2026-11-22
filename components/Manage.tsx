@@ -14,8 +14,16 @@ interface ManageProps {
 }
 
 const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  // Read the saved login synchronously so a logged-in admin never sees the
+  // login box flash before the dashboard (that swap caused a large layout shift).
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('admin_token');
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!authToken);
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'locations' | 'reviews' | 'submissions'>('locations');
   const [reviews, setReviews] = useState<AdminReview[]>([]);
@@ -111,13 +119,6 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    if (token) {
-      setAuthToken(token);
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   // Load reviews when switching to reviews tab
   useEffect(() => {

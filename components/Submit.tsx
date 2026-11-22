@@ -12,7 +12,7 @@ const Submit: React.FC = () => {
   const [captchaAnswer, setCaptchaAnswer] = useState('');
 
   // UI states
-  const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
+  const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(true); // fetched on mount
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,24 +165,24 @@ const Submit: React.FC = () => {
                 <label htmlFor="captcha" className="block text-sm font-medium text-slate-700 mb-1">
                   Security Check <span className="text-red-500">*</span>
                 </label>
-                {isLoadingCaptcha ? (
-                  <div className="text-slate-500 text-sm py-2">Loading...</div>
-                ) : (
-                  <>
-                    <div className="text-lg font-semibold text-slate-800 mb-2 bg-slate-50 p-3 rounded border border-slate-200">
-                      {captchaQuestion}
-                    </div>
-                    <input
-                      type="number"
-                      id="captcha"
-                      value={captchaAnswer}
-                      onChange={(e) => setCaptchaAnswer(e.target.value)}
-                      placeholder="Your answer"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={isSubmitting}
-                    />
-                  </>
-                )}
+                {/* Same boxes while loading and loaded, so the form doesn't jump. */}
+                <div
+                  className={`text-lg font-semibold mb-2 bg-slate-50 p-3 rounded border border-slate-200 ${
+                    isLoadingCaptcha ? 'text-slate-400' : 'text-slate-800'
+                  }`}
+                  aria-live="polite"
+                >
+                  {isLoadingCaptcha ? 'Loading question…' : captchaQuestion || ' '}
+                </div>
+                <input
+                  type="number"
+                  id="captcha"
+                  value={captchaAnswer}
+                  onChange={(e) => setCaptchaAnswer(e.target.value)}
+                  placeholder="Your answer"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isSubmitting || isLoadingCaptcha}
+                />
               </div>
 
               {/* Error Message */}

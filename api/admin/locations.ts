@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from '../_db.js';
 import { verifyJWT } from '../_auth.js';
+import { currentSeason, ensureLocationSeasonColumn } from '../_season.js';
 
 const mapLocation = (row: any) => ({
   id: row.id,
@@ -16,6 +17,8 @@ const mapLocation = (row: any) => ({
   notes: row.notes,
   radio_station: row.radio_station,
   radioStation: row.radio_station,
+  activeSeason: row.active_season ?? null,
+  isActive: row.active_season === currentSeason(),
 });
 
 const unauthorized = (res: VercelResponse) => res.status(401).json({ error: 'Unauthorized' });
@@ -43,6 +46,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   if (!(await ensureAuth(req, res))) return;
 
   try {
+    await ensureLocationSeasonColumn();
+    // Admin sees every house, active or archived.
     const { rows } = await query(
       'SELECT * FROM locations ORDER BY featured DESC, title ASC'
     );
@@ -65,10 +70,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
 
     const id = `loc_${Date.now()}`;
     const featured = body.featured ? 1 : 0;
+    // New houses are active for the current season unless explicitly unchecked.
+    const activeSeason = body.isActive === false ? null : currentSeason();
 
+    await ensureLocationSeasonColumn();
     await query(
-      `INSERT INTO locations (id, title, description, lat, lng, featured, address, schedule, notes, radio_station)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      `INSERT INTO locations (id, title, description, lat, lng, featured, address, schedule, notes, radio_station, active_season)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         id,
         body.title,
@@ -79,7 +87,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
         body.address || null,
         body.schedule || null,
         body.notes || null,
-        body.radioStation || null
+        body.radioStation || null,
+        activeSeason,
       ]
     );
 

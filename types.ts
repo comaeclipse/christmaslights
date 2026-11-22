@@ -9,6 +9,9 @@ export interface LocationData {
   schedule?: string;
   notes?: string;
   radioStation?: string;
+  // Admin only: season this house is confirmed for, and whether that's the current one.
+  activeSeason?: number | null;
+  isActive?: boolean;
 }
 
 export interface Review {

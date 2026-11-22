@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from '../../_db.js';
 import { verifyJWT } from '../../_auth.js';
+import { currentSeason, ensureLocationSeasonColumn } from '../../_season.js';
 
 const mapLocation = (row: any) => ({
   id: row.id,
@@ -16,6 +17,8 @@ const mapLocation = (row: any) => ({
   notes: row.notes,
   radio_station: row.radio_station,
   radioStation: row.radio_station,
+  activeSeason: row.active_season ?? null,
+  isActive: row.active_season === currentSeason(),
 });
 
 const unauthorized = (res: VercelResponse) => res.status(401).json({ error: 'Unauthorized' });
@@ -48,6 +51,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const id = req.query.id as string;
 
   try {
+    await ensureLocationSeasonColumn();
     const { rows } = await query('SELECT * FROM locations WHERE id = $1', [id]);
 
     if (rows.length === 0) {
@@ -82,6 +86,15 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
         paramIndex++;
       }
     }
+
+    // "Active this season" switch: activate for the current season, or archive.
+    if (typeof body.isActive === 'boolean') {
+      updates.push(`active_season = $${paramIndex}`);
+      values.push(body.isActive ? currentSeason() : null);
+      paramIndex++;
+    }
+
+    await ensureLocationSeasonColumn();
 
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No valid fields to update' });

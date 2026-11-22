@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from './_db.js';
 import crypto from 'node:crypto';
+import { currentSeasonStart } from './_season.js';
 
 const mapReview = (row: any) => ({
   id: row.id,
@@ -16,11 +17,6 @@ const mapReview = (row: any) => ({
 
 // Public pages only show the current season's reviews; older ones stay in the
 // database (archived) and remain visible in the admin panel.
-// A season runs Aug 1 – Jul 31. Keep in sync with utils/season.ts.
-const currentSeasonStart = (now: Date = new Date()) => {
-  const year = now.getUTCMonth() >= 7 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
-  return `${year}-08-01T00:00:00.000Z`;
-};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {

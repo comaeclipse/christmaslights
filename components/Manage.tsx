@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LocationData, Review, LocationSubmission } from '../types';
 import { api } from '../services/apiClient';
+import { currentSeasonYear } from '../utils/season';
 
 interface AdminReview extends Review {
   ipAddress?: string;
@@ -131,6 +132,43 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
       loadSubmissions();
     }
   }, [activeTab, authToken]);
+
+  // Load every location (active and archived) once logged in
+  const [loadingLocations, setLoadingLocations] = useState(false);
+  useEffect(() => {
+    if (!authToken) return;
+    setLoadingLocations(true);
+    api
+      .adminGetLocations(authToken)
+      .then(setLocations)
+      .catch((error: any) => {
+        console.error('Failed to load locations:', error);
+        if (error.status === 401) {
+          handle401Error(error);
+        } else {
+          alert('Failed to load locations. Please refresh the page.');
+        }
+      })
+      .finally(() => setLoadingLocations(false));
+  }, [authToken]);
+
+  const season = currentSeasonYear();
+  const activeCount = locations.filter((l) => l.isActive).length;
+
+  const handleToggleActive = async (loc: LocationData) => {
+    if (!authToken) return;
+    try {
+      const updated = await api.adminUpdateLocation(loc.id, { isActive: !loc.isActive }, authToken);
+      setLocations((prev) => prev.map((l) => (l.id === loc.id ? updated : l)));
+    } catch (error: any) {
+      console.error('Failed to update season status:', error);
+      if (error.status === 401) {
+        handle401Error(error);
+      } else {
+        alert('Failed to update location. Please try again.');
+      }
+    }
+  };
 
   const loadReviews = async () => {
     if (!authToken) return;
@@ -482,10 +520,16 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
 
             {/* List Column */}
             <div className="lg:col-span-2">
+               <div className="mb-3 text-sm text-slate-600">
+                  {loadingLocations
+                    ? 'Loading locations…'
+                    : <><strong>{activeCount}</strong> of {locations.length} houses are showing on the map for the {season} season. Archived houses stay hidden until you switch them on.</>}
+               </div>
                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                      <thead className="bg-gray-50">
                         <tr>
+                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{season} season</th>
                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -493,7 +537,21 @@ const Manage: React.FC<ManageProps> = ({ locations, setLocations }) => {
                      </thead>
                      <tbody className="bg-white divide-y divide-gray-200">
                         {locations.map((loc) => (
-                           <tr key={loc.id} className="hover:bg-gray-50">
+                           <tr key={loc.id} className={`hover:bg-gray-50 ${loc.isActive ? '' : 'opacity-60'}`}>
+                              <td className="px-4 py-4 whitespace-nowrap">
+                                 <label className="inline-flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={!!loc.isActive}
+                                      onChange={() => handleToggleActive(loc)}
+                                      className="h-4 w-4"
+                                      aria-label={`Show ${loc.title} on the map this season`}
+                                    />
+                                    <span className={`text-xs font-medium ${loc.isActive ? 'text-green-700' : 'text-gray-500'}`}>
+                                      {loc.isActive ? 'Active' : loc.activeSeason ? `Archived (${loc.activeSeason})` : 'Archived'}
+                                    </span>
+                                 </label>
+                              </td>
                               <td className="px-6 py-4">
                                  <div className="text-sm font-medium text-gray-900">{loc.title}</div>
                                  <div className="text-sm text-gray-500 truncate max-w-xs">{loc.description}</div>

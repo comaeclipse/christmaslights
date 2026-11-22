@@ -78,6 +78,19 @@ class ApiClient {
     return res.json();
   }
 
+  // All locations, including ones archived from past seasons.
+  async adminGetLocations(token: string): Promise<LocationData[]> {
+    const res = await fetch(`${API_BASE}/admin/locations`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const error: any = new Error('Failed to fetch locations');
+      error.status = res.status;
+      throw error;
+    }
+    return res.json();
+  }
+
   async adminCreateLocation(
     location: Omit<LocationData, 'id'>,
     token: string

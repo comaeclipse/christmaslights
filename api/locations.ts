@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from './_db.js';
+import { currentSeason, ensureLocationSeasonColumn } from './_season.js';
 
 const mapLocation = (row: any) => ({
   id: row.id,
@@ -23,8 +24,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    await ensureLocationSeasonColumn();
+    // Only houses confirmed for the current season appear on the public map.
     const { rows } = await query(
-      'SELECT * FROM locations ORDER BY featured DESC, title ASC'
+      'SELECT * FROM locations WHERE active_season = $1 ORDER BY featured DESC, title ASC',
+      [currentSeason()]
     );
     // Cache at Vercel's CDN for 60s and serve stale while refreshing, so most
     // visitors never wait on a cold function or database wake-up.

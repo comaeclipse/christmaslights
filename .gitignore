@@ -32,3 +32,4 @@ migrations/
 *.sw?
 
 .vercel
+stats.html

@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   return {
     server: {
       port: 3000,
@@ -11,12 +11,16 @@ export default defineConfig(() => {
     },
     plugins: [
       react(),
-      visualizer({
-        open: true,
-        filename: 'dist/stats.html',
-        gzipSize: true,
-        brotliSize: true,
-      })
+      // Bundle size report: only when requested via `npm run analyze`.
+      // Kept out of normal builds so it doesn't pop open a browser tab or get
+      // deployed publicly as /stats.html.
+      mode === 'analyze' &&
+        visualizer({
+          open: true,
+          filename: 'stats.html',
+          gzipSize: true,
+          brotliSize: true,
+        }),
     ],
     resolve: {
       alias: {

@@ -10,6 +10,7 @@ interface SidebarProps {
   onAddReview: (locationId: string, rating: number, text: string) => void;
   isOpen: boolean;
   toggleSidebar: () => void;
+  isLoading?: boolean;
 }
 
 const StarRatingDisplay: React.FC<{ rating: number; size?: 'sm' | 'md' }> = ({ rating, size = 'sm' }) => {
@@ -31,7 +32,7 @@ const StarRatingDisplay: React.FC<{ rating: number; size?: 'sm' | 'md' }> = ({ r
   return <div className="flex gap-0.5">{stars}</div>;
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationId, onLocationSelect, onAddReview, isOpen, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationId, onLocationSelect, onAddReview, isOpen, toggleSidebar, isLoading = false }) => {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const update = () => setIsMobile(window.innerWidth < 768);
@@ -289,6 +290,9 @@ const Sidebar: React.FC<SidebarProps> = ({ locations, reviews, selectedLocationI
           </div>
         ) : (
           <div className="space-y-4">
+            {isLoading && locations.length === 0 && (
+              <p className="text-sm text-slate-500 italic text-center py-8">Loading displays…</p>
+            )}
             {locations.map((loc) => {
               const stats = getStats(loc.id);
               return (

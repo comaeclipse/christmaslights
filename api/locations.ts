@@ -26,6 +26,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { rows } = await query(
       'SELECT * FROM locations ORDER BY featured DESC, title ASC'
     );
+    // Cache at Vercel's CDN for 60s and serve stale while refreshing, so most
+    // visitors never wait on a cold function or database wake-up.
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=86400');
     res.status(200).json(rows.map(mapLocation));
   } catch (error) {
     console.error('Failed to fetch locations', error);

@@ -3,9 +3,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { Review, LocationData } from './types';
 import { api } from './services/apiClient';
+import { currentSeasonYear } from './utils/season';
 
-// Lazy load components
-const LightMap = lazy(() => import('./components/LightMap'));
+// Start downloading the map code immediately (in parallel with the data fetch)
+// instead of waiting until the page first renders.
+const lightMapImport = import('./components/LightMap');
+const LightMap = lazy(() => lightMapImport);
 const Privacy = lazy(() => import('./components/Privacy'));
 const Legal = lazy(() => import('./components/Legal'));
 
@@ -14,22 +17,26 @@ const Home: React.FC<{
   locations: LocationData[];
   reviews: Review[];
   setReviews: React.Dispatch<React.SetStateAction<Review[]>>;
-}> = ({ locations, reviews, setReviews }) => {
+  isLoading: boolean;
+}> = ({ locations, reviews, setReviews, isLoading }) => {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window === 'undefined') return true;
     return window.innerWidth >= 768; // default closed on mobile, open on desktop
   });
 
-  // Cookie helper to prevent duplicate reviews
+  // Cookie helper to prevent duplicate reviews (one review per location per season)
+  const reviewCookieName = (locationId: string) => `reviewed_${currentSeasonYear()}_${locationId}`;
+
   const hasReviewed = (locationId: string): boolean => {
-    return document.cookie.split(';').some((item) => item.trim().startsWith(`reviewed_${locationId}=`));
+    const name = reviewCookieName(locationId);
+    return document.cookie.split(';').some((item) => item.trim().startsWith(`${name}=`));
   };
 
   const markAsReviewed = (locationId: string) => {
     const date = new Date();
     date.setFullYear(date.getFullYear() + 1);
-    document.cookie = `reviewed_${locationId}=true; expires=${date.toUTCString()}; path=/`;
+    document.cookie = `${reviewCookieName(locationId)}=true; expires=${date.toUTCString()}; path=/`;
   };
 
   const handleAddReview = async (locationId: string, rating: number, text: string) => {
@@ -75,6 +82,7 @@ const Home: React.FC<{
         onAddReview={handleAddReview}
         isOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
+        isLoading={isLoading}
       />
 
       <main className={`flex-1 relative h-full transition-all duration-300 ${isSidebarOpen ? 'md:ml-96' : 'ml-0'}`}>
@@ -124,14 +132,8 @@ const App: React.FC = () => {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
-        <div className="text-slate-800 text-lg">Loading PensacolaLights...</div>
-      </div>
-    );
-  }
-
+  // No full-screen loading gate: the page and map render right away and the
+  // markers/list fill in as soon as the data arrives.
   if (error) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
@@ -148,7 +150,7 @@ const App: React.FC = () => {
         </div>
       }>
         <Routes>
-          <Route path="/" element={<Home locations={locations} reviews={reviews} setReviews={setReviews} />} />
+          <Route path="/" element={<Home locations={locations} reviews={reviews} setReviews={setReviews} isLoading={loading} />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/legal" element={<Legal />} />
         </Routes>

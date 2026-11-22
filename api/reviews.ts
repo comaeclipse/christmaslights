@@ -12,8 +12,15 @@ const mapReview = (row: any) => ({
   author: row.author,
   date: row.date,
   created_at: row.created_at,
-  ip_address: row.ip_address,
 });
+
+// Public pages only show the current season's reviews; older ones stay in the
+// database (archived) and remain visible in the admin panel.
+// A season runs Aug 1 – Jul 31. Keep in sync with utils/season.ts.
+const currentSeasonStart = (now: Date = new Date()) => {
+  const year = now.getUTCMonth() >= 7 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+  return `${year}-08-01T00:00:00.000Z`;
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
@@ -27,13 +34,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
   const locationId = req.query.location_id as string | undefined;
+  const seasonStart = currentSeasonStart();
   try {
     const { rows } = await query(
       locationId
-        ? 'SELECT * FROM reviews WHERE location_id = $1 ORDER BY date DESC'
-        : 'SELECT * FROM reviews ORDER BY date DESC',
-      locationId ? [locationId] : undefined
+        ? 'SELECT * FROM reviews WHERE date >= $1 AND location_id = $2 ORDER BY date DESC'
+        : 'SELECT * FROM reviews WHERE date >= $1 ORDER BY date DESC',
+      locationId ? [seasonStart, locationId] : [seasonStart]
     );
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=86400');
     res.status(200).json(rows.map(mapReview));
   } catch (error) {
     console.error('Failed to fetch reviews', error);

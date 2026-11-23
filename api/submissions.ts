@@ -2,8 +2,39 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from './_db.js';
 import { verify, decode } from '@tsndr/cloudflare-worker-jwt';
 import crypto from 'node:crypto';
+import { getJwtSecret } from './_auth.js';
 
-const getJwtSecret = () => process.env.JWT_SECRET || 'change-me-secret';
+// Captcha tokens are single-use: each token's id is recorded here the first
+// time it's used. Rows are only needed until the token expires (5 minutes).
+let usedTableReady: Promise<unknown> | null = null;
+const ensureUsedCaptchaTable = () => {
+  if (!usedTableReady) {
+    usedTableReady = query(
+      `CREATE TABLE IF NOT EXISTS used_captcha_tokens (
+         jti TEXT PRIMARY KEY,
+         expires_at TIMESTAMPTZ NOT NULL
+       )`
+    ).catch((err) => {
+      usedTableReady = null;
+      throw err;
+    });
+  }
+  return usedTableReady;
+};
+
+// Returns true the first time a token id is seen, false on any reuse.
+async function claimCaptchaToken(jti: string, exp: number): Promise<boolean> {
+  await ensureUsedCaptchaTable();
+  const { rowCount } = await query(
+    `INSERT INTO used_captcha_tokens (jti, expires_at)
+     VALUES ($1, to_timestamp($2))
+     ON CONFLICT (jti) DO NOTHING`,
+    [jti, exp]
+  );
+  // Housekeeping: expired ids can't be replayed anyway.
+  query('DELETE FROM used_captcha_tokens WHERE expires_at < NOW()').catch(() => {});
+  return rowCount === 1;
+}
 
 function getRealIP(req: VercelRequest): string | null {
   // Priority order: CF-Connecting-IP (Cloudflare), X-Real-IP, X-Forwarded-For, socket
@@ -46,11 +77,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Decode JWT to get payload
-    const payload = decode(captchaToken).payload as { answer: number; exp: number };
+    const payload = decode(captchaToken).payload as { answer: number; exp: number; jti?: string };
 
     // Check if captcha answer is correct
     if (payload.answer !== parseInt(captchaAnswer)) {
       return res.status(400).json({ error: 'Incorrect captcha answer' });
+    }
+
+    // Each solved captcha may only be used once.
+    if (!payload.jti || !(await claimCaptchaToken(payload.jti, payload.exp))) {
+      return res.status(400).json({ error: 'This security check was already used. Please answer the new question.' });
     }
 
     // Generate submission ID

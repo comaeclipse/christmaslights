@@ -23,6 +23,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  const token = await createJWT({ role: 'admin' });
-  return res.status(200).json({ token });
+  try {
+    const token = await createJWT({ role: 'admin' });
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Failed to create admin token:', error);
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
 }
